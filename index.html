@@ -51,6 +51,19 @@
         color: var(--dark-text);
       }
 
+      #themeToggle {
+        margin-left: 20px;
+        font-size: 1.3rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--royal-purple); /* Make icon purple by default */
+        transition: color 0.3s;
+      }
+      body.dark-mode #themeToggle {
+        color:var(--light-pink); /* Change icon color in dark mode */
+      }
+
       body.dark-mode header,
       body.dark-mode .about,
       body.dark-mode .contact {
