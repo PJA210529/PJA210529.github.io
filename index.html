@@ -835,7 +835,9 @@
                 Perfect for travel or quick creative breaks. Each book features
                 original designs and high-quality paper.
               </p>
-               <button class="btn view-details-btn" data-product="coloring">View Details</button>
+              <button class="btn view-details-btn" data-product="coloring">
+                View Details
+              </button>
             </div>
           </div>
           <div class="product-card">
@@ -848,7 +850,9 @@
                 Beautifully crafted pens with unique designs. Perfect as gifts
                 or promotional items for your business.
               </p>
-               <button class="btn view-details-btn" data-product="pens">View Details</button>
+              <button class="btn view-details-btn" data-product="pens">
+                View Details
+              </button>
             </div>
           </div>
           <div class="product-card">
@@ -861,26 +865,28 @@
                 Customized packs for weddings, birthdays, corporate events, and
                 holidays. Tailored to your specific needs.
               </p>
-               <button class="btn view-details-btn" data-product="events">View Details</button>
+              <button class="btn view-details-btn" data-product="events">
+                View Details
+              </button>
             </div>
           </div>
         </div>
       </div>
     </section>
     <!-- Modal Carousel start-->
-<div id="productModal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close-modal">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <div class="carousel">
-      <button class="carousel-btn prev-btn">&#10094;</button>
-      <img id="carouselImg" src="" alt="Product Image" />
-      <button class="carousel-btn next-btn">&#10095;</button>
+    <div id="productModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <div class="carousel">
+          <button class="carousel-btn prev-btn">&#10094;</button>
+          <img id="carouselImg" src="" alt="Product Image" />
+          <button class="carousel-btn next-btn">&#10095;</button>
+        </div>
+        <div id="carouselIndicators"></div>
+      </div>
     </div>
-    <div id="carouselIndicators"></div>
-  </div>
-</div>
-<!-- ...Modal Carousel end... -->
+    <!-- ...Modal Carousel end... -->
 
     <!-- About Section -->
     <section class="about" id="about">
@@ -1103,7 +1109,7 @@
     </footer>
 
     <script>
-      // Modal carousel logic
+      // Modal carousel logic with video support
       const productImages = {
         coloring: [
           "assets/ColoringBook pack.jpg",
@@ -1113,16 +1119,21 @@
           "assets/Themed CB.jpg",
           "assets/Variants ColoringBook .jpg",
         ],
-        pens: ["assets/Variants pen 1.jpg", "assets/Variants pen 2.jpg", "assets/Variants pen 3.jpg"],
+        pens: [
+          "assets/Variants pen 1.jpg",
+          "assets/Variants pen 2.jpg",
+          "assets/Variants pen 3.jpg",
+        ],
         events: [
           "assets/Red pack.jpg",
           "assets/Pink pack .jpg",
           "assets/Blue pack.jpg",
           "assets/Yellow pack.jpg",
           "assets/Variants pack.jpg",
-          "assets/assets/Looking_for_a_perfect_Teacher_s_Day_gift__✨__Why_not_surprise_them_with_something..._See_more.mp4",
+          "assets/Looking_for_a_perfect_Teacher_s_Day_gift__✨__Why_not_surprise_them_with_something..._See_more.mp4", // Fixed path - removed duplicate "assets/"
         ],
       };
+
       const productTitles = {
         coloring: "Mini Coloring Books",
         pens: "Custom Pens",
@@ -1147,17 +1158,56 @@
         modal.style.display = "flex";
         document.body.style.overflow = "hidden";
       }
+
       function closeModal() {
+        // Pause any playing video when closing modal
+        const existingVideo = document.getElementById("carouselVideo");
+        if (existingVideo) {
+          existingVideo.pause();
+        }
         modal.style.display = "none";
         document.body.style.overflow = "";
       }
+
       function updateCarousel() {
         const imgs = productImages[currentProduct];
-        carouselImg.src = imgs[currentIndex];
-        carouselImg.alt =
-          productTitles[currentProduct] + " " + (currentIndex + 1);
+        const currentSrc = imgs[currentIndex];
 
-        // Indicators
+        // Remove existing video if any
+        let existingVideo = document.getElementById("carouselVideo");
+        if (existingVideo) {
+          existingVideo.pause();
+          existingVideo.remove();
+        }
+
+        // Check if current file is a video
+        if (currentSrc && currentSrc.match(/\.(mp4|webm|ogg)$/i)) {
+          carouselImg.style.display = "none";
+
+          // Create and insert video element
+          const video = document.createElement("video");
+          video.id = "carouselVideo";
+          video.src = currentSrc;
+          video.controls = true;
+          video.autoplay = true;
+          video.style.width = "260px";
+          video.style.height = "180px";
+          video.style.borderRadius = "10px";
+          video.style.background = "#eee";
+          video.style.objectFit = "cover";
+          video.setAttribute("playsinline", "");
+
+          // Insert video after the image element
+          carouselImg.parentNode.insertBefore(video, carouselImg.nextSibling);
+        } else {
+          // It's an image
+          carouselImg.src = currentSrc;
+          carouselImg.alt =
+            productTitles[currentProduct] + " " + (currentIndex + 1);
+          carouselImg.style.display = "block";
+        }
+
+        // Update indicators
         indicators.innerHTML = "";
         imgs.forEach((_, i) => {
           const dot = document.createElement("span");
@@ -1170,23 +1220,29 @@
         });
       }
 
+      // Event listeners
       prevBtn.onclick = () => {
         const imgs = productImages[currentProduct];
         currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
         updateCarousel();
       };
+
       nextBtn.onclick = () => {
         const imgs = productImages[currentProduct];
         currentIndex = (currentIndex + 1) % imgs.length;
         updateCarousel();
       };
+
       document.querySelectorAll(".view-details-btn").forEach((btn) => {
         btn.onclick = () => showModal(btn.dataset.product);
       });
+
       document.querySelector(".close-modal").onclick = closeModal;
+
       window.onclick = function (event) {
         if (event.target === modal) closeModal();
       };
+
       document.addEventListener("keydown", function (e) {
         if (modal.style.display === "flex") {
           if (e.key === "Escape") closeModal();
@@ -1194,8 +1250,6 @@
           if (e.key === "ArrowRight") nextBtn.click();
         }
       });
-
-      // ...existing code...
       // Mobile menu toggle
       document
         .getElementById("mobileMenuBtn")
