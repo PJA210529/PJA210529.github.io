@@ -418,6 +418,93 @@
         font-size: 5rem;
         box-shadow: 0 10px 30px rgba(155, 107, 255, 0.2);
       }
+      /* ...modal start... */
+      .modal {
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px 20px 20px 20px;
+        max-width: 420px;
+        width: 90vw;
+        position: relative;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+      body.dark-mode .modal-content {
+        background: #232136;
+        color: var(--dark-text);
+      }
+      .close-modal {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 2rem;
+        color: var(--royal-purple);
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .carousel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 25px 0 10px 0;
+        position: relative;
+      }
+      .carousel img {
+        width: 260px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(155, 107, 255, 0.08);
+        background: #eee;
+      }
+      .carousel-btn {
+        background: none;
+        border: none;
+        color: var(--royal-purple);
+        font-size: 2.2rem;
+        cursor: pointer;
+        padding: 0 10px;
+        transition: color 0.2s;
+        user-select: none;
+      }
+      .carousel-btn:hover {
+        color: var(--pastel-pink);
+      }
+      #carouselIndicators {
+        margin-top: 10px;
+      }
+      #carouselIndicators span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ccc;
+        margin: 0 3px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #carouselIndicators .active {
+        background: var(--royal-purple);
+      }
+      body.dark-mode #carouselIndicators span {
+        background: #444;
+      }
+      body.dark-mode #carouselIndicators .active {
+        background: var(--pastel-pink);
+      }
+      /* ...modal end... */
 
       /* Testimonials */
       .testimonials {
@@ -780,6 +867,20 @@
         </div>
       </div>
     </section>
+    <!-- Modal Carousel start-->
+<div id="productModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <div class="carousel">
+      <button class="carousel-btn prev-btn">&#10094;</button>
+      <img id="carouselImg" src="" alt="Product Image" />
+      <button class="carousel-btn next-btn">&#10095;</button>
+    </div>
+    <div id="carouselIndicators"></div>
+  </div>
+</div>
+<!-- ...Modal Carousel end... -->
 
     <!-- About Section -->
     <section class="about" id="about">
@@ -1002,6 +1103,99 @@
     </footer>
 
     <script>
+      // Modal carousel logic
+      const productImages = {
+        coloring: [
+          "assets/coloringBook pack.jpg",
+          "assets/coloringBook sample.jpg",
+          "assets/coloringBook sample2.jpg",
+          "assets/Customize ColoringBook.jpg",
+          "assets/Themed CB.jpg",
+          "assets/Variants ColoringBook.jpg",
+        ],
+        pens: ["assets/Variants pen 1.jpg", "assets/Variants pen 2.jpg", "assets/Variants pen 3.jpg"],
+        events: [
+          "assets/Red pack.jpg",
+          "assets/Pink pack.jpg",
+          "assets/Blue pack.jpg",
+          "assets/Yellow pack.jpg",
+          "assets/Variants pack.jpg",
+          "assets/assets/Looking_for_a_perfect_Teacher_s_Day_gift__✨__Why_not_surprise_them_with_something..._See_more.mp4",
+        ],
+      };
+      const productTitles = {
+        coloring: "Mini Coloring Books",
+        pens: "Custom Pens",
+        events: "Event & Holiday Packs",
+      };
+
+      let currentProduct = "coloring";
+      let currentIndex = 0;
+
+      const modal = document.getElementById("productModal");
+      const modalTitle = document.getElementById("modalTitle");
+      const carouselImg = document.getElementById("carouselImg");
+      const prevBtn = document.querySelector(".carousel-btn.prev-btn");
+      const nextBtn = document.querySelector(".carousel-btn.next-btn");
+      const indicators = document.getElementById("carouselIndicators");
+
+      function showModal(product) {
+        currentProduct = product;
+        currentIndex = 0;
+        modalTitle.textContent = productTitles[product];
+        updateCarousel();
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+      function closeModal() {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
+      function updateCarousel() {
+        const imgs = productImages[currentProduct];
+        carouselImg.src = imgs[currentIndex];
+        carouselImg.alt =
+          productTitles[currentProduct] + " " + (currentIndex + 1);
+
+        // Indicators
+        indicators.innerHTML = "";
+        imgs.forEach((_, i) => {
+          const dot = document.createElement("span");
+          dot.className = i === currentIndex ? "active" : "";
+          dot.onclick = () => {
+            currentIndex = i;
+            updateCarousel();
+          };
+          indicators.appendChild(dot);
+        });
+      }
+
+      prevBtn.onclick = () => {
+        const imgs = productImages[currentProduct];
+        currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
+        updateCarousel();
+      };
+      nextBtn.onclick = () => {
+        const imgs = productImages[currentProduct];
+        currentIndex = (currentIndex + 1) % imgs.length;
+        updateCarousel();
+      };
+      document.querySelectorAll(".view-details-btn").forEach((btn) => {
+        btn.onclick = () => showModal(btn.dataset.product);
+      });
+      document.querySelector(".close-modal").onclick = closeModal;
+      window.onclick = function (event) {
+        if (event.target === modal) closeModal();
+      };
+      document.addEventListener("keydown", function (e) {
+        if (modal.style.display === "flex") {
+          if (e.key === "Escape") closeModal();
+          if (e.key === "ArrowLeft") prevBtn.click();
+          if (e.key === "ArrowRight") nextBtn.click();
+        }
+      });
+
+      // ...existing code...
       // Mobile menu toggle
       document
         .getElementById("mobileMenuBtn")
